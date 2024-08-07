@@ -1,0 +1,672 @@
+---
+title: "Exam Project File- Nicholas Seremba 2023-MI32-21498"
+author: "Nicholas Seremba"
+date: "2024-08-02"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+## **1. INTRODUCTION**
+In the pursuit of understanding the intricate relationship between lifestyle choices and health outcomes, this Assignment delves into a comprehensive data analysis targeting individuals from various occupational backgrounds. 
+
+Recognizing that each profession carries unique lifestyle attributes—from sedentary to physically demanding roles—this study seeks to illuminate how these differences translate into health impacts.
+
+By dissecting data through a multifaceted lens, encompassing Sleep Duration, sleep quality, physical activity, Body Mass index, heart rates  and stress levels among others, we aim to provide a nuanced view of health as it intersects with the professional lives of individuals. The insights garnered here are poised to contribute significantly to the discourse on occupational health and wellness, potentially guiding policy decisions and personal lifestyle modifications for improved well-being.
+
+### Objective Of the assignment
+
+The objective of this Assignment is to systematically analyze and quantify the influence of lifestyle factors, such as Sleep Duration, sleep quality, physical activity, Body Mass index, heart rates  and stress levels, on the health outcomes of individuals engaged in a variety of occupational roles. 
+
+By employing robust statistical methods and data analysis techniques, this study aims to uncover patterns and correlations that can inform effective health interventions and policies tailored to the needs of diverse professional groups.”
+
+
+### Description of the Dataset
+
+The Sleep Health and Lifestyle Dataset comprises 400 rows and 13 columns, covering a wide range of variables related to sleep and daily habits. It includes details such as gender, age, occupation, sleep duration, quality of sleep, physical activity level, stress levels, BMI category, blood pressure, heart rate, daily steps, and the presence or absence of sleep disorders.
+
+This data was collected in a discrete survey from employees in an organization, performing different roles to identify how their work life, and resting patterns are affecting their productivity.
+there are some hypotheses to be proven from this dataset.
+
+#### Relevance of the Dataset: 
+
+The data was obtained from employees from different walks of life to understand which how job types are relate to health issues, and stress levels, as well as overall sleep routines in employees lives, to determine actual effects of these on productivity while at work.
+
+The data set also seeks to identify if sleep patterns and increased stress levels at work using the correlation between different metrics of the dataset.
+
+The relevance of this analysis will guide decision making that will help organizations to design stress management programs for their employees, using data analytics as well as health and wellness packages both at work and outside work.
+
+It could also help organizations to gain insight on how to assist their employees to boost their work energy by segmenting time while at work to allow for rest intervals, and interludes.
+
+This analysis can further be used in health care by providers to identify patterns related to sleep disorders, insomnia, or sleep apnea. Businesses in the wellness industry can use this analysis to develop sleep-tracking apps, wearable devices, or personalized sleep improvement programs.
+
+
+## **2. DATA COLLECTION**
+
+### Data source
+
+Data source: 
+This data was obtained from [Kaggle](https://www.kaggle.com/datasets/uom190346a/sleep-health-and-lifestyle-dataset/)
+
+### Data Collection Method
+
+This dataset was downloaded from the Kaggle website and saved locally prior to the start of the data analsyis process
+
+## **3 DATA CLEANING**
+
+
+
+### Setting up my environment
+Notes:  Setting up my R environment by loading packages from the tidyverse, and the Health_dataset to be analysed.
+
+```{r loading packages, warning=FALSE}
+library(utils)
+  library(tidyverse)
+  library(readxl)
+  library(dplyr)
+  library(purrr)
+library(cluster)
+library(readr)
+
+health_dataset <- read_csv("D:/Master Class/Year 1 Sem2/BIG DATA ANALYTICS/EBA Project/Sleep_health_and_lifestyle_dataset.csv")
+
+```
+
+### Data cleaning steps
+
+We shall be performing the following actions to clean the data:
+
+  * Remove unneeded columns from the data
+  * Confirm variable types for each variable(column)
+- Select and filter data and store each in required objects
+- Finding and Dealing with missing data in the selected objects
+- Checking for duplicates in the different data objects
+- Recording values
+
+
+```{r calling the cleaning libraries}
+
+library(janitor)
+library(skimr)
+library(dplyr)
+
+```
+
+2.	In order to understand the  comprehensive summary of the dataset, the   **dplyr** package **(skim_without_charts)**  was used as below
+This gives us a quick look at where we shall be focusing when cleaning our data.
+
+
+```{r getting the comprehensive summary of the dataset}
+
+ 
+ skim_without_charts(health_dataset)
+ 
+```
+#### *Insight:*
+
+* There is no missing data (NULL values) in any of the variables, there are no white spaces in our data,  and we shall be using 11 unique Occupations in this analysis.
+
+* Statistical values have also been generated as seen above. 
+We shall further perform data cleaning checks to ensure consistency in the data.
+
+
+
+
+#### 3. Removing unwanted columns
+
+Now that we don’t require the Person ID column, we used the NULL assignment to remove it as follows
+
+```{r Removing the unnecessary column with Person IDs}
+ 
+ 
+ health_dataset$`Person ID`<- NULL
+ 
+ str(health_dataset)
+ 
+```
+
+
+#### Reviewing the datatypes 
+
+Checking  the variable data types using the glimpse function
+
+```{r Confirm variable types for each variable(column)}
+ 
+ glimpse(health_dataset)
+```
+#### *Insight:*
+
+Gender is of type “Character” but needs to be changed to type **“Factor”**
+Required Clean up: to change the type from **Character to Factor** Using the assignment operator <-  As below
+
+
+```{r Changing Gender type from chr to factor}
+
+ health_dataset$Gender<- as.factor(health_dataset$Gender)
+ class(health_dataset$Gender)
+```
+ 
+ ## 4.Checking for unique Values in variables to eliminate null value possibility in the Variables of interest
+ 
+```{r Checking for unique Values in variables to eliminate null value possibility}
+unique(health_dataset$Gender)
+ 
+ levels(health_dataset$Gender)
+ 
+ unique(health_dataset$`BMI Category`)
+```
+
+ 5. Checking for missing values usin the Tidyverse pipe operator
+ 
+```{r Ensure that the dataframe variable names are returning known data types only ie Underscores btn the words}
+
+ health_dataset1<- clean_names(health_dataset)
+```
+ 
+```{r Checking for missing values in the dataset using the pipe operator}
+ # 
+ 
+  DS1<-health_dataset %>% 
+    select(Occupation, Gender, Age,  `Sleep Duration`, `Sleep Disorder`, `Heart Rate`, `BMI Category` ) %>% 
+    filter(!complete.cases(.))
+
+view(DS1)
+  
+```
+
+ #### *Insight:*
+ 
+ There are no Missing Values in the data
+ 
+ 
+  ### Checking for **Duplicates** in our dataset,  and understanding them prior to the analysis
+  
+ 
+```{r}
+ health_dataset[!duplicated(health_dataset), ]
+
+```
+#### *Insight:*
+
+There are no Duplicate entries in the dataset since this is a survey from multiple employment domains. 
+These  records were uniquely identified by Person ID column in the dataset.
+
+### Recoding the male and Female variables to aid in the analysis
+
+```{r Recoding variables }
+
+  
+  health_dataset %>% 
+    select(Occupation, Gender, everything()) %>% 
+    mutate(Gender_coded = recode(Gender, "Male" = 1, "Female" = 2 )) %>% 
+    View()
+```
+ 
+ Result: Male has been given a code 1 and Female has code 2. 
+ 
+ This will be used later in the data normalization for statistical analysis.
+ 
+ 
+ ### **4 DATA INTEGRATION**
+ 
+ Creating and integrating related datasets using R
+ 
+ 
+In the case where the datasets is contained in different tabs of the Excel files, we shall use the “map_df function merge the datasets”
+
+
+```{r}
+#males Sheet
+  
+  males_only_Dataset<- read_excel("D:/Sleep_health_and_lifestyle_dataset.xlsx", sheet = "Males")
+  head(males_only_Dataset)
+  
+  #females sheet
+  
+  females_only_Dataset<- read_excel("D:/Sleep_health_and_lifestyle_dataset.xlsx", sheet = "Females")
+  head(females_only_Dataset)
+  
+```
+
+  
+  Worksheet integration of data in 2 tabs of the excel sheet into 1  data frame as below 
+  
+```{r integrating data}
+ combined_sheet<- excel_sheets("D:/Sleep_health_and_lifestyle_dataset.xlsx") %>% 
+  map_df(~read_xlsx("D:/Sleep_health_and_lifestyle_dataset.xlsx", .))
+```
+ 
+ 
+ #### *Insight:*
+ 
+ Data in both sheets in the datafile has been integrated  to include both males and female employees who took the survey.
+ 
+  it will be noted that the **Remarks** Variable and the **"This is a sample dataset"** Variable have been populated form the excel sheets in the dataset, and will be populated with Null values in the dataset where there are no values for them.
+ 
+ This is going to be confirmed using the Unique function below
+confirming that the sheets are now combined in the created data object
+  
+we shall use the unique function to check for presence of both genders
+  
+```{r}
+unique(combined_sheet$Gender)
+  
+  
+```
+#### *Result:*
+
+both male and females gender are visible in the combined Dataset, along with new variables mentioned above
+
+```{r}
+#viewing all variables after the merging of the data
+  
+  colnames(combined_sheet)
+```
+  
+```{r}
+head(combined_sheet)
+tail(combined_sheet)
+
+```
+  
+
+  # **4. EXPLORAORY DATA ANALYSIS**
+  
+  
+  Here we shall be utilizing Descriptive Statistics to summarize the data in the EDA Stage
+  
+ 
+  * identify and handle missing values
+  * transforming data
+  * Creating Visual Representations
+  * Document Findings
+  
+  
+  
+
+```{r}
+
+library(tidyverse)
+  library(cluster)
+```
+
+### understanding the Data dimensions
+  
+```{r}
+ dim(health_dataset)
+```
+ 
+  
+### understanding more of our dataset  in one place 
+```{r}
+  
+  glimpse(health_dataset)
+
+```
+
+  
+### Tabulating the dataset in R to further view it
+```{r}
+  
+  View(health_dataset)
+```
+
+  
+### Viewing the data brief
+
+```{r}
+head(health_dataset)
+```
+
+
+### Applying deeper analysis by variable
+
+```{r}
+attach(health_dataset)
+
+class(`Sleep Duration`)
+length(`Quality of Sleep`)
+unique(Occupation)
+```
+
+
+### understanding which variables exist in the dataset
+```{r}
+names(health_dataset)
+
+clean_names(health_dataset)
+```
+
+
+### summarizing the normalized dataset
+
+For a complete analysis, we shall apply codes to the below variables prior to our exploration
+
+* Occupation -------- occupation_Codes
+* BMI Category ------ BMI_category_code
+* Gender------------- Gender_code
+
+
+```{r}
+ unique(health_dataset$Occupation)
+  unique(health_dataset$`BMI Category`)
+  unique(health_dataset$Gender)
+  
+  Gender_code<- c("Male"= 1, "Female"= 2)
+  BMI_category_code<- c("Normal"= 1, "Overweight"= 2, "Obese"= 3)
+  occupation_codes <- c("Software Engineer" = 1, "Doctor"=2, "Sales Representative"=3, "Teacher"=4, "Nurse"=5, "Engineer"=6, "Accountant"=7, "Scientist"=8, "Lawyer"=9, "Salesperson"= 10, "Manager"=11 )
+  normalized_DS<- health_dataset
+  
+  normalized_DS<- normalized_DS %>% 
+    
+    mutate(Occupation_code = as.numeric(recode(Occupation, !!!occupation_codes))) %>% 
+    mutate(BMI_category_code = as.numeric(recode(`BMI Category`, !!!BMI_category_code))) %>% 
+    mutate(Gender_code = as.numeric(recode(Gender, !!!Gender_code))) %>% 
+    select(Gender_code, Occupation_code, BMI_category_code,Age, `Sleep Duration`,`Quality of Sleep`, `Physical Activity Level`, `Stress Level`,`Heart Rate`, `Daily Steps`)
+  
+```
+```{r}
+attach(health_dataset)
+occupations <- table(health_dataset$Occupation)
+#pie(occupations, labels = names(occupations), main = "Occupation Distribution", col = rainbow(length(occupations)))
+
+print(occupations)
+
+print(length(health_dataset$Occupation) )
+
+
+```
+
+
+####Our Output from the new normalized dataset
+
+```{r}
+   view(normalized_DS)
+```
+
+  
+```{r}
+library(dplyr)
+attach(normalized_DS)
+summary(normalized_DS)
+
+```
+  
+#### *INSIGHTS* From the data summary above
+
+* **Age Distribution:** The age of individuals ranges from 27 to 59 years, with a median age of 43. This suggests a middle-aged demographic.
+* **Sleep Patterns:** The duration of sleep varies from 5.8 to 8.5 hours, with most individuals averaging around 7.13 hours. The quality of sleep scores range from 4 to 9, indicating a wide variation in sleep quality among individuals.
+
+* **Physical Activity:** The level of physical activity reported ranges from 30 to 90, with a median of 60. This indicates a moderate level of physical activity among the individuals.
+
+* **Stress Levels:** Stress levels range from 3 to 8, with an average slightly above the midpoint at 5.39. This could suggest a moderate level of stress in the population.
+
+* **Heart Rate:** The heart rate spans from 65 to 86 beats per minute, with an average of 70.17 bpm. This is within the normal resting heart rate range for adults.
+
+* **Daily Steps:** The number of daily steps taken ranges from 3000 to 10000, with an average of 6817 steps. This suggests that on average, individuals are somewhat active.
+* **Clusters:** The data is grouped into clusters ranging from 1 to 4, which  indicates the different groupings based on the collected variables.
+  
+## i) Performing a basic cluster analysis discovery
+  
+### Selecting relevant columns for clustering
+```{r}
+data_for_clustering <- normalized_DS[, c('Age', 'Sleep Duration', 'Quality of Sleep', 'Physical Activity Level', 'Stress Level', 'Heart Rate', 'Daily Steps')]
+```
+
+
+### Standardizing the data
+
+```{r}
+data_for_clustering <- scale(data_for_clustering)
+```
+
+
+
+### Performing k-means clustering with an arbitrary choice of 3 clusters
+
+```{r}
+
+set.seed(123) # for reproducibility
+ wss <- sapply(1:10, function(k){kmeans(data_for_clustering, k, nstart = 3)$tot.withinss})
+ optimal_k <- which.min(wss)
+ clusters <- kmeans(data_for_clustering, centers = optimal_k)
+
+```
+set.seed(123) # Setting seed for reproducibility
+clusters <- kmeans(data_for_clustering, centers =3 )
+
+### Adding cluster assignment to the original dataframe
+
+```{r}
+normalized_DS$cluster <- clusters$cluster
+```
+
+
+#### Viewing the distribution of clusters
+```{r}
+table(normalized_DS$cluster)
+```
+
+#### Performing k-means clustering
+
+
+```{r}
+kmeans_result <- kmeans(data_for_clustering, centers = optimal_k)
+```
+ 
+
+
+ 
+#### Viewing the first few rows of the dataframe with cluster assignments
+
+```{r}
+kmeans_result$centers
+```
+
+
+#### Insight from the cluster analysis
+* **Cluster 1:** This cluster  consists of individuals with high physical activity levels, low stress levels, and a high number of daily steps. They  represent a segment of the population that is physically active and possibly has better cardiovascular health, as indicated by a lower average heart rate.
+ 
+* **Cluster 2:** This cluster  includes individuals with higher BMI categories, lower quality of sleep, and lower physical activity levels. These individuals are at a higher risk for lifestyle-related health issues and could benefit from interventions aimed at weight management and improving sleep quality.
+
+* **Cluster 3:** The third cluster is characterized by individuals with moderate levels of physical activity and stress, average sleep duration, and heart rate. They  represent a ‘middle-ground’ segment that maintains a balance between activity and rest.
+
+* **Cluster 4:** Features individuals with average age, high sleep duration, and the highest physical activity levels. They have slightly lower stress levels and heart rates, and high daily steps. This group seems to be very active with good sleep habits.
+* **Cluster 5:** Represents the youngest individuals with low sleep duration, low physical activity levels, and high stress levels. They have the highest heart rates but very low daily steps. This could indicate a sedentary lifestyle with possible sleep issues.
+* **Cluster 6:** Includes individuals with average age, good sleep duration, and moderate physical activity levels. However, they have lower stress levels, very high heart rates, and extremely low daily steps. This group might include individuals with health conditions affecting heart rate and mobility.
+* **Cluster 7:** Comprises very young individuals with low sleep duration, very low physical activity levels, high stress levels, average heart rates, and low daily steps. This group might be at risk of lifestyle-related health issues.
+* **Cluster 8:** Contains individuals of average age with below-average sleep duration, low physical activity levels, lower stress levels, the lowest heart rates, and low daily steps. This could be a sedentary group with a relaxed lifestyle.
+* **Cluster 9:** Features the oldest individuals with the highest sleep duration, slightly below-average physical activity levels, the lowest stress levels, low heart rates, and low daily steps. This group might be retirees or those with a relaxed, low-activity lifestyle.
+* **Cluster 10:** Includes individuals with average age, below-average sleep duration, low physical activity levels, high stress levels, average heart rates, and low daily steps. This group might be experiencing stress that affects their sleep and activity levels.
+
+
+
+# Plotting the clusters using ggplot2 (example using first two columns for simplicity)
+
+```{r}
+library(ggplot2)
+library(cluster)
+ggplot(normalized_DS, aes(x=Age, y= 'Sleep Duration', color=cluster)) + 
+  geom_point(alpha = 0.5) + 
+  theme_minimal() +
+   labs(title = 'Cluster Plot', x = 'Age', y = 'Sleep Duration')
+
+```
+
+```{r}
+view(data_for_clustering)
+```
+
+
+## ii). Performing PREDICTIVE MODELLING
+
+
+we shall develop a predictive model to forecast health outcomes such as “Blood Pressure”  and  “Heart Rate” based on other variables. We shall use “Physical Activity Level”, “Age”, “Sleep Duration” and “Daily Steps” and “Stress Level”
+  
+ 
+###Selecting relevant variables from 
+```{r}
+clustered_data <- health_dataset %>%
+    select(Age, `Sleep Duration`, `Physical Activity Level`, `Stress Level`, `Heart Rate`, `Daily Steps`)
+```
+  
+  
+###Scaling the data in order to normalize it for analysis
+```{r}
+  scaled_data <- scale(clustered_data)
+```
+
+  
+### Determining the optimal number of clusters using the elbow method
+```{r}
+set.seed(123) # for reproducibility
+  wss <- map_dbl(2:10, ~kmeans(scaled_data, .x)$tot.withinss)
+  elbow_plot <- tibble(k = 2:10, wss = wss)
+  ggplot(elbow_plot, aes(x = k, y = wss)) + geom_line() + geom_point()+ 
+    labs(title ="health outcomes based on other variables", x= "Clusters", y = "within-Sum Of Squares(WSS)" )
+  
+```
+  
+### Assuming the optimal number of clusters is 4 (based on the elbow plot)
+```{r}
+ final_kmeans <- kmeans(scaled_data, centers = 4)
+```
+
+
+#Adding cluster assignments to the original data
+```{r}
+ health_dataset$cluster <- final_kmeans$cluster
+```
+ 
+#### **Insights**
+
+
+* Predictive Power: The model’s ability to assign new individuals to these clusters based on their health data can be used to predict their health profiles and proactively address potential health issues.
+* The WSS is highest in the cluster 1 and 2 and keep gradually falling as per the predictive model, until cluster10. this fully explores the lifestyle patterns based on correlations between “Stress Level” and “Physical Activity Level” or between “Sleep Duration” and “Daily Steps”.
+
+deeper analysis in the tableau visualization will mine insights from this finding.
+
+
+## iii). PERFORMING A REGRESSION ANALYSIS
+
+* 'Heart Rate' is the dependent variable 
+* 'Age', 'Sleep Duration', and 'Physical Activity Level' are independent variables
+* We shall be using the **normalized_DS** for this analysis
+
+```{r}
+ model <- lm(`Heart Rate` ~ Age + `Sleep Duration` + `Physical Activity Level`, data = normalized_DS)
+```
+
+
+### Get a summary of the model
+```{r}
+  summary(model)
+```
+### INSIGHTS:
+
+ * **Intercept:** The intercept is estimated at 88.9055. This means that when all the independent variables are zero, the expected value of the dependent variable is approximately 88.9055.
+ 
+* **Age:** The coefficient for “Age” is -0.04108, which suggests that for each additional year of age, the heart rate decreases by 0.04108 beats per minute, on average. However, this result is not statistically significant at the 5% level *(p-value = 0.0585)*, as indicated by the ‘.’ sign.
+
+* **Sleep Duration:** The coefficient for “Sleep Duration” is -2.825719, indicating a significant negative relationship with heart rate. For each additional hour of sleep, the heart rate decreases by about 2.825719 beats per minute. This is statistically significant with a p-value of less than 2e-16 (indicated by ‘***’)
+
+* **Physical Activity Level:** The coefficient for “Physical Activity Level” is 0.053176, suggesting a positive relationship with heart rate. As physical activity level increases, the heart rate increases by 0.053176 beats per minute, on average. This is also statistically significant (p-value = 2.11e-09, indicated by ‘***’).
+
+
+
+### Diagnostic plots
+
+```{r}
+  par(mfrow = c(2, 2))
+  plot(model)
+```
+  #### *INSIGHTS*
+  
+* **Residuals vs Fitted:** This plot helps to check the assumption of linearity and homoscedasticity (constant variance of residuals). Ideally, the residuals should be randomly scattered around the horizontal line at zero, indicating no pattern. If there’s a clear pattern or a systematic structure, this suggests that the model may not be capturing some aspect of the data’s structure.
+
+* **Normal Q-Q:** This plot shows if the residuals are normally distributed, which is an assumption of linear regression. Points following the straight line indicate normality. Deviations from this line suggest departures from normality.
+
+* **Scale-Location (or Spread-Location):** This plot is similar to the Residuals vs Fitted plot but shows the square root of the absolute residuals. It’s another way to assess homoscedasticity. A horizontal line with equally spread points along the line suggests homoscedasticity.
+
+
+* **Residuals vs Leverage: **This plot helps to identify influential observations that have more “leverage” on the regression line. Points that stand out far to the right or have high Cook’s distance values (often represented by dashed lines) can be influential points.
+  
+  
+  
+#####Visualization of sleep duration Vs Age of the different occupations
+  
+```{r}
+ ggplot(data = health_dataset, aes(x = `Sleep Duration`, y= Age))+ geom_point(aes(colour = Occupation))+
+    facet_wrap(~Occupation)
+```
+ 
+ 
+ 
+ 
+  
+```{r}
+ ggplot(data = health_dataset)+ 
+    geom_bar (aes(x = Occupation, fill = `BMI Category`))+
+    labs(title = "Health dataset on sleep duration by Age in the different Occupations", caption = paste0("dataset from Kaggle.com" ))+
+    theme(axis.text.x = element_text(angle = 45))
+```
+####INSIGHTS:
+ 
+*  Basic plotting of the Occupation by BMI Category counts shows that the biggest number of nurses and teachers are over weight
+ 
+ this data can be further extrapolated to gain insights into why most doctors are normal while nurses are over wieight. 
+ 
+ the data can be checked against sleep quality and Age range of the nurses to gain more understanding of the cause.
+ 
+ * It is  also worth noticing that while doctors are mostly healthy, the biggest number of doctors are obese compared to the whole population in the dataset.
+ 
+ 
+ 
+```{r}
+
+# quick correlation analysis on sleep Duration vs stress level
+
+
+# Install ggplot2 package if not already installed
+if(!require(ggplot2)) install.packages("ggplot2")
+
+# Load the ggplot2 package
+library(ggplot2)
+
+# Create a scatter plot with a smooth line to show the correlation
+ggplot(normalized_DS, aes(x='Sleep Duration', y='Stress Level', color=factor('Gender code'))) +
+  geom_point() +
+  geom_smooth(method="lm", se=FALSE) +
+  labs(title="Correlation between Sleep Duration and Stress Levels",
+       x="Sleep Duration (hours)",
+       y="Stress Level")
+```
+ 
+ 
+ 
+#                                                  END                                          
+ 
+ 
+
+
+ 
+  
+  
+
+
+
+
+
+
+
+
+
+  
+ 
+  
+ 
+
+
+ 
+  
